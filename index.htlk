@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système Bouton Panique</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal des Alertes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            margin: 5px;
+            width: 100%;
+            min-height: 44px;
+        }
+        
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-gray { background: #95a5a6; color: white; }
+        
+        .journal-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .journal-content {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-book"></i> JOURNAL DES ALERTES</h1>
+            <a href="index.html" class="btn btn-gray">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </header>
+
+        <section class="card">
+            <div class="journal-actions">
+                <button id="btn-effacer-journal" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Effacer le journal
+                </button>
+                <button id="btn-copier-journal" class="btn btn-secondary">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+
+            <div class="journal-content">
+                <pre id="contenu-journal"></pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Charger le journal
+        function chargerJournal() {
+            const journal = localStorage.getItem('journal_alertes') || 'Aucune alerte enregistrée.';
+            document.getElementById('contenu-journal').textContent = journal;
+        }
+        
+        // Effacer le journal
+        document.getElementById('btn-effacer-journal').addEventListener('click', function() {
+            if (confirm('Voulez-vous vraiment effacer tout le journal ?')) {
+                localStorage.removeItem('journal_alertes');
+                chargerJournal();
+                afficherMessage('Journal effacé', 'success');
+            }
+        });
+        
+        // Copier le journal
+        document.getElementById('btn-copier-journal').addEventListener('click', function() {
+            const journal = document.getElementById('contenu-journal').textContent;
+            navigator.clipboard.writeText(journal)
+                .then(() => afficherMessage('Journal copié', 'success'))
+                .catch(() => afficherMessage('Erreur de copie', 'error'));
+        });
+        
+        // Afficher message
+        function afficherMessage(text, type = 'info') {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px;
+                border-radius: 5px;
+                color: white;
+                z-index: 1001;
+                background: ${type === 'success' ? '#27ae60' : '#e74c3c'};
+            `;
+            
+            document.body.appendChild(message);
+            setTimeout(() => message.remove(), 3000);
+        }
+        
+        // Initialiser
+        document.addEventListener('DOMContentLoaded', chargerJournal);
+    </script>
+</body>
+</html>        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.2rem;
+        }
+        
+        /* Form elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            margin: 5px 0;
+            width: 100%;
+            min-height: 44px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-purple { background: #9b59b6; color: white; }
+        .btn-teal { background: #1abc9c; color: white; }
+        .btn-gray { background: #95a5a6; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.9rem;
+        }
+        
+        thead {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        /* Result */
+        .resultat {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            white-space: pre-line;
+            font-family: monospace;
+        }
+        
+        /* Edition form */
+        .edition-form {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .form-buttons, .global-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        
+        .form-buttons .btn, .global-actions .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+            text-align: right;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+            }
+            
+            .btn {
+                width: auto;
+            }
+            
+            .form-buttons .btn, .global-actions .btn {
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <header class="header">
+            <h1><i class="fas fa-exclamation-triangle"></i> SYSTÈME BOUTON PANIQUE</h1>
+        </header>
+
+        <!-- Section Alerte -->
+        <section class="card">
+            <h2><i class="fas fa-bell"></i> ALERTE PANIQUE</h2>
+            
+            <div class="form-group">
+                <label for="code-panique">Code de panique :</label>
+                <input type="text" id="code-panique" placeholder="Entrez le code" maxlength="10">
+                <button id="btn-alerte" class="btn btn-danger">
+                    <i class="fas fa-bolt"></i> DÉCLENCHER ALERTE
+                </button>
+            </div>
+            
+            <div id="resultat-alerte" class="resultat"></div>
+            
+            <div class="actions">
+                <button id="btn-journal" class="btn btn-info">
+                    <i class="fas fa-book"></i> Voir le journal des alertes
+                </button>
+            </div>
+        </section>
+
+        <!-- Section Gestion -->
+        <section class="card">
+            <h2><i class="fas fa-key"></i> GESTION DES CODES</h2>
+            
+            <div class="form-group">
+                <label for="recherche">Rechercher :</label>
+                <div class="search-container">
+                    <input type="text" id="recherche" placeholder="Code ou site...">
+                    <button id="btn-recherche" class="btn btn-secondary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Liste des codes -->
+            <div class="table-container">
+                <table id="table-codes">
+                    <thead>
+                        <tr>
+                            <th>CODE</th>
+                            <th>SITE</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-codes">
+                        <!-- Les codes seront chargés ici -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Formulaire d'édition -->
+            <div class="edition-form">
+                <h3><i class="fas fa-edit"></i> ÉDITION</h3>
+                
+                <div class="form-group">
+                    <label for="code-edit">Code :</label>
+                    <input type="text" id="code-edit" placeholder="Code (ex: 828)" maxlength="10">
+                </div>
+                
+                <div class="form-group">
+                    <label for="site-edit">Site :</label>
+                    <input type="text" id="site-edit" placeholder="Nom du site">
+                </div>
+                
+                <div class="form-buttons">
+                    <button id="btn-ajouter" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Ajouter
+                    </button>
+                    <button id="btn-modifier" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button id="btn-supprimer" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                    <button id="btn-sauvegarder" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Actions Globales -->
+        <section class="card">
+            <h2><i class="fas fa-cogs"></i> ACTIONS GLOBALES</h2>
+            
+            <div class="global-actions">
+                <button id="btn-exporter" class="btn btn-purple">
+                    <i class="fas fa-download"></i> Exporter
+                </button>
+                <button id="btn-importer" class="btn btn-teal">
+                    <i class="fas fa-upload"></i> Importer
+                </button>
+                <button id="btn-rafraichir" class="btn btn-gray">
+                    <i class="fas fa-sync"></i> Rafraîchir
+                </button>
+            </div>
+        </section>
+
+        <!-- Input pour l'import -->
+        <input type="file" id="file-input" accept=".json" style="display:none">
+    </div>
+
+    <!-- Modal d'alerte -->
+    <div id="modal-alerte" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-circle"></i> ALERTE PANIQUE</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-modal-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données par défaut
+        const DONNEES_DEFAUT = {
+            "828": "oscar 1 a",
+            "913": "oscar 1 b et lima5",
+            "813": "oscar 9",
+            "118": "lima 13",
+            "855": "oscar 12",
+            "827": "oscar 16",
+            "838": "oscar 14",
+            "815": "lima 8",
+            "841": "lima 6",
+            "511": "oscar 3",
+            "113": "oscar 15",
+            "842": "lima 4",
+            "926": "lima 10",
+            "858": "lima 14",
+            "999": "lima 15",
+            "848": "oscar 05",
+            "5126": "lima 2",
+            "832": "Rlog",
+            "824": "oscar 8",
+            "125": "Lima 11",
+            "854": "cp",
+            "911": "oscar 10",
+            "914": "Lima 9",
+            "313": "oscar 4",
+            "826": "oscar 13 et lima 18",
+            "326": "oscar 11",
+            "327": "lima 7"
+        };
+
+        let donnees = {};
+        let codeSelectionne = null;
+
+        // Charger les données
+        function chargerDonnees() {
+            const donneesSauvegardees = localStorage.getItem('codes_panique');
+            if (donneesSauvegardees) {
+                donnees = JSON.parse(donneesSauvegardees);
+            } else {
+                donnees = {...DONNEES_DEFAUT};
+                sauvegarderDonnees();
+            }
+            afficherCodes();
+        }
+
+        // Sauvegarder les données
+        function sauvegarderDonnees() {
+            localStorage.setItem('codes_panique', JSON.stringify(donnees));
+        }
+
+        // Afficher les codes
+        function afficherCodes() {
+            const tbody = document.getElementById('tbody-codes');
+            const recherche = document.getElementById('recherche')?.value.toLowerCase() || '';
+            
+            tbody.innerHTML = '';
+            
+            Object.entries(donnees)
+                .filter(([code, site]) => 
+                    !recherche || 
+                    code.toLowerCase().includes(recherche) || 
+                    site.toLowerCase().includes(recherche)
+                )
+                .sort(([codeA], [codeB]) => codeA.localeCompare(codeB))
+                .forEach(([code, site]) => {
+                    const tr = document.createElement('tr');
+                    
+                    tr.innerHTML = `
+                        <td style="font-weight:bold; font-family:monospace">${code}</td>
+                        <td>${site}</td>
+                        <td>
+                            <button class="btn btn-primary" style="padding:5px; font-size:12px" onclick="selectionnerCode('${code}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+        }
+
+        // Sélectionner un code
+        window.selectionnerCode = function(code) {
+            document.getElementById('code-edit').value = code;
+            document.getElementById('site-edit').value = donnees[code];
+            codeSelectionne = code;
+            afficherMessage(`Code ${code} sélectionné`, 'success');
+        };
+
+        // Déclencher alerte
+        document.getElementById('btn-alerte').addEventListener('click', function() {
+            const code = document.getElementById('code-panique').value.trim();
+            
+            if (!code) {
+                afficherMessage('Veuillez entrer un code', 'warning');
+                return;
+            }
+            
+            const site = donnees[code];
+            
+            if (site) {
+                const now = new Date();
+                const heure = now.toLocaleTimeString();
+                const date = now.toLocaleDateString();
+                
+                const message = `ALERTE PANIQUE DÉCLENCHÉE\n\nCode : ${code}\nSite : ${site}\nHeure : ${heure}\nDate : ${date}`;
+                
+                // Afficher résultat
+                document.getElementById('resultat-alerte').textContent = message;
+                
+                // Modal
+                document.getElementById('modal-message').textContent = `ALERTE !\n\nCode: ${code}\nSite: ${site}\nHeure: ${heure}`;
+                document.getElementById('modal-alerte').style.display = 'flex';
+                
+                // Vibration
+                if (navigator.vibrate) navigator.vibrate(200);
+                
+                // Journaliser
+                journaliserAlerte(code, site, heure, date);
+                
+                // Effacer champ
+                document.getElementById('code-panique').value = '';
+            } else {
+                afficherMessage(`Code ${code} non trouvé`, 'error');
+            }
+        });
+
+        // Journaliser alerte
+        function journaliserAlerte(code, site, heure, date) {
+            let journal = localStorage.getItem('journal_alertes') || '';
+            journal += `[${date} ${heure}] Code:${code} - Site:${site}\n`;
+            localStorage.setItem('journal_alertes', journal);
+        }
+
+        // Ouvrir journal
+        document.getElementById('btn-journal').addEventListener('click', function() {
+            window.location.href = 'journal.html';
+        });
+
+        // Rechercher
+        document.getElementById('btn-recherche').addEventListener('click', afficherCodes);
+        document.getElementById('recherche').addEventListener('input', afficherCodes);
+
+        // Boutons d'édition
+        document.getElementById('btn-ajouter').addEventListener('click', function() {
+            document.getElementById('code-edit').value = '';
+            document.getElementById('site-edit').value = '';
+            codeSelectionne = null;
+            afficherMessage('Prêt à ajouter un nouveau code', 'success');
+        });
+
+        document.getElementById('btn-modifier').addEventListener('click', function() {
+            const code = document.getElementById('code-edit').value.trim();
+            if (!code) {
+                afficherMessage('Sélectionnez un code d\'abord', 'warning');
+                return;
+            }
+            afficherMessage('Modification en cours', 'info');
+        });
+
+        document.getElementById('btn-supprimer').addEventListener('click', function() {
+            const code = document.getElementById('code-edit').value.trim();
+            if (!code) {
+                afficherMessage('Sélectionnez un code d\'abord', 'warning');
+                return;
+            }
+            if (confirm(`Supprimer le code ${code} ?`)) {
+                delete donnees[code];
+                sauvegarderDonnees();
+                afficherCodes();
+                document.getElementById('code-edit').value = '';
+                document.getElementById('site-edit').value = '';
+                afficherMessage(`Code ${code} supprimé`, 'success');
+            }
+        });
+
+        document.getElementById('btn-sauvegarder').addEventListener('click', function() {
+            const code = document.getElementById('code-edit').value.trim();
+            const site = document.getElementById('site-edit').value.trim();
+            
+            if (!code || !site) {
+                afficherMessage('Remplissez tous les champs', 'warning');
+                return;
+            }
+            
+            donnees[code] = site;
+            sauvegarderDonnees();
+            afficherCodes();
+            document.getElementById('code-edit').value = '';
+            document.getElementById('site-edit').value = '';
+            codeSelectionne = null;
+            afficherMessage(`Code ${code} sauvegardé`, 'success');
+        });
+
+        // Actions globales
+        document.getElementById('btn-exporter').addEventListener('click', function() {
+            const dataStr = JSON.stringify(donnees, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'donnees_panique.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            afficherMessage('Données exportées', 'success');
+        });
+
+        document.getElementById('btn-importer').addEventListener('click', function() {
+            document.getElementById('file-input').click();
+        });
+
+        document.getElementById('btn-rafraichir').addEventListener('click', function() {
+            chargerDonnees();
+            afficherMessage('Données rafraîchies', 'success');
+        });
+
+        // Importer fichier
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const nouvellesDonnees = JSON.parse(e.target.result);
+                    donnees = {...donnees, ...nouvellesDonnees};
+                    sauvegarderDonnees();
+                    afficherCodes();
+                    afficherMessage('Données importées', 'success');
+                } catch (err) {
+                    afficherMessage('Fichier invalide', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        });
+
+        // Modal
+        document.querySelector('.close-modal').addEventListener('click', function() {
+            document.getElementById('modal-alerte').style.display = 'none';
+        });
+
+        document.getElementById('btn-modal-ok').addEventListener('click', function() {
+            document.getElementById('modal-alerte').style.display = 'none';
+        });
+
+        // Afficher message
+        function afficherMessage(text, type = 'info') {
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px;
+                border-radius: 5px;
+                color: white;
+                z-index: 1001;
+                background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#f39c12'};
+                animation: slideIn 0.3s;
+            `;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.animation = 'slideOut 0.3s';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+
+        // Animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            chargerDonnees();
+            
+            // Touche Entrée pour alerte
+            document.getElementById('code-panique').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('btn-alerte').click();
+                }
+            });
+            
+            console.log('Application panique chargée');
+        });
+    </script>
+</body>
+</html>
