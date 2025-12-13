@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal des Alertes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            margin: 5px;
+            width: 100%;
+            min-height: 44px;
+        }
+        
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-gray { background: #95a5a6; color: white; }
+        
+        .journal-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .journal-content {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-book"></i> JOURNAL DES ALERTES</h1>
+            <a href="index.html" class="btn btn-gray">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </header>
+
+        <section class="card">
+            <div class="journal-actions">
+                <button id="btn-effacer-journal" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Effacer le journal
+                </button>
+                <button id="btn-copier-journal" class="btn btn-secondary">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+
+            <div class="journal-content">
+                <pre id="contenu-journal"></pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Charger le journal
+        function chargerJournal() {
+            const journal = localStorage.getItem('journal_alertes') || 'Aucune alerte enregistrée.';
+            document.getElementById('contenu-journal').textContent = journal;
+        }
+        
+        // Effacer le journal
+        document.getElementById('btn-effacer-journal').addEventListener('click', function() {
+            if (confirm('Voulez-vous vraiment effacer tout le journal ?')) {
+                localStorage.removeItem('journal_alertes');
+                chargerJournal();
+                afficherMessage('Journal effacé', 'success');
+            }
+        });
+        
+        // Copier le journal
+        document.getElementById('btn-copier-journal').addEventListener('click', function() {
+            const journal = document.getElementById('contenu-journal').textContent;
+            navigator.clipboard.writeText(journal)
+                .then(() => afficherMessage('Journal copié', 'success'))
+                .catch(() => afficherMessage('Erreur de copie', 'error'));
+        });
+        
+        // Afficher message
+        function afficherMessage(text, type = 'info') {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px;
+                border-radius: 5px;
+                color: white;
+                z-index: 1001;
+                background: ${type === 'success' ? '#27ae60' : '#e74c3c'};
+            `;
+            
+            document.body.appendChild(message);
+            setTimeout(() => message.remove(), 3000);
+        }
+        
+        // Initialiser
+        document.addEventListener('DOMContentLoaded', chargerJournal);
+    </script>
+</body>
+  </html>
