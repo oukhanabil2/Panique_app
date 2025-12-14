@@ -6,6 +6,42 @@
     <title>Système Bouton Panique</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Section Admin */
+.admin-info {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.admin-info p {
+    color: #155724;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#admin-login {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Indicateur mode admin */
+.mode-admin .form-buttons .btn {
+    display: inline-block !important;
+}
+
+.mode-admin .edition-form {
+    background: #e8f4fd;
+    border: 2px solid #3498db;
+}
         /* Style de base */
         * {
             margin: 0;
@@ -393,6 +429,13 @@
 
         let donnees = {};
         let codeSelectionne = null;
+        // Configuration Admin
+const ADMIN_CONFIG_KEY = 'panique_admin_config';
+const ADMIN_SESSION_KEY = 'panique_admin_session';
+let isAdminMode = false;
+
+// Mot de passe par défaut (à changer)
+const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
         // Charger les données
         function chargerDonnees() {
@@ -704,20 +747,261 @@
             }
         `;
         document.head.appendChild(style);
+        // Gestion de l'authentification admin
+function initAdminSystem() {
+    checkAdminSession();
+    setupAdminListeners();
+    updateAdminUI();
+}
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            chargerDonnees();
-            
-            // Touche Entrée pour alerte
-            document.getElementById('code-panique').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('btn-alerte').click();
-                }
-            });
-            
-            console.log('Application panique chargée');
+function checkAdminSession() {
+    const session = localStorage.getItem(ADMIN_SESSION_KEY);
+    if (session) {
+        const sessionData = JSON.parse(session);
+        const now = Date.now();
+        // Session valide 30 minutes
+        if (now - sessionData.timestamp < 30 * 60 * 1000) {
+            isAdminMode = true;
+        } else {
+            // Session expirée
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            isAdminMode = false;
+        }
+    } else {
+        isAdminMode = false;
+    }
+}
+
+function getAdminPassword() {
+    const config = localStorage.getItem(ADMIN_CONFIG_KEY);
+    if (config) {
+        return JSON.parse(config).password;
+    }
+    // Retourner le mot de passe par défaut si pas de config
+    return DEFAULT_ADMIN_PASSWORD;
+}
+
+function saveAdminPassword(newPassword) {
+    const config = {
+        password: newPassword,
+        updated: new Date().toISOString()
+    };
+    localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(config));
+    return true;
+}
+
+function loginAdmin(password) {
+    const storedPassword = getAdminPassword();
+    
+    if (password === storedPassword) {
+        const sessionData = {
+            timestamp: Date.now(),
+            expires: Date.now() + (30 * 60 * 1000) // 30 minutes
+        };
+        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(sessionData));
+        isAdminMode = true;
+        updateAdminUI();
+        afficherMessage('Connexion admin réussie', 'success');
+        return true;
+    } else {
+        afficherMessage('Mot de passe incorrect', 'error');
+        return false;
+    }
+}
+
+function logoutAdmin() {
+    localStorage.removeItem(ADMIN_SESSION_KEY);
+    isAdminMode = false;
+    updateAdminUI();
+    afficherMessage('Déconnexion admin', 'info');
+}
+
+function updateAdminUI() {
+    const adminSection = document.getElementById('admin-section');
+    const adminLogin = document.getElementById('admin-login');
+    const adminControls = document.getElementById('admin-controls');
+    const editionButtons = document.querySelectorAll('#btn-ajouter, #btn-modifier, #btn-supprimer, #btn-sauvegarder');
+    const editionForm = document.querySelector('.edition-form');
+    
+    if (adminSection) adminSection.style.display = 'block';
+    
+    if (isAdminMode) {
+        // Mode admin activé
+        if (adminLogin) adminLogin.style.display = 'none';
+        if (adminControls) adminControls.style.display = 'block';
+        
+        // Activer les boutons d'édition
+        editionButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
         });
+        
+        // Ajouter classe mode admin
+        if (editionForm) {
+            editionForm.parentElement.classList.add('mode-admin');
+        }
+        
+        // Cacher le champ mot de passe
+        document.getElementById('admin-password').value = '';
+    } else {
+        // Mode admin désactivé
+        if (adminLogin) adminLogin.style.display = 'block';
+        if (adminControls) adminControls.style.display = 'none';
+        
+        // Désactiver les boutons d'édition
+        editionButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+        });
+        
+        // Retirer classe mode admin
+        if (editionForm) {
+            editionForm.parentElement.classList.remove('mode-admin');
+        }
+    }
+}
+
+function setupAdminListeners() {
+    // Connexion admin
+    document.getElementById('btn-admin-login').addEventListener('click', function() {
+        const password = document.getElementById('admin-password').value;
+        if (password) {
+            loginAdmin(password);
+        } else {
+            afficherMessage('Veuillez entrer un mot de passe', 'warning');
+        }
+    });
+    
+    // Entrée sur le champ mot de passe
+    document.getElementById('admin-password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('btn-admin-login').click();
+        }
+    });
+    
+    // Déconnexion admin
+    document.getElementById('btn-admin-logout').addEventListener('click', logoutAdmin);
+    
+    // Changer mot de passe
+    document.getElementById('btn-change-password').addEventListener('click', function() {
+        document.getElementById('modal-change-password').style.display = 'flex';
+    });
+    
+    // Fermer modal changement mot de passe
+    document.querySelector('.close-modal-password').addEventListener('click', function() {
+        document.getElementById('modal-change-password').style.display = 'none';
+        clearPasswordFields();
+    });
+    
+    // Sauvegarder nouveau mot de passe
+    document.getElementById('btn-save-password').addEventListener('click', function() {
+        const current = document.getElementById('current-password').value;
+        const newPass = document.getElementById('new-password').value;
+        const confirm = document.getElementById('confirm-password').value;
+        
+        if (!current || !newPass || !confirm) {
+            afficherMessage('Remplissez tous les champs', 'warning');
+            return;
+        }
+        
+        if (newPass !== confirm) {
+            afficherMessage('Les mots de passe ne correspondent pas', 'error');
+            return;
+        }
+        
+        if (newPass.length < 4) {
+            afficherMessage('Le mot de passe doit faire au moins 4 caractères', 'warning');
+            return;
+        }
+        
+        // Vérifier mot de passe actuel
+        if (current !== getAdminPassword()) {
+            afficherMessage('Mot de passe actuel incorrect', 'error');
+            return;
+        }
+        
+        // Sauvegarder le nouveau mot de passe
+        saveAdminPassword(newPass);
+        afficherMessage('Mot de passe changé avec succès', 'success');
+        document.getElementById('modal-change-password').style.display = 'none';
+        clearPasswordFields();
+    });
+    
+    // Fermer modales en cliquant à l'extérieur
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('modal-change-password');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            clearPasswordFields();
+        }
+    });
+}
+
+function clearPasswordFields() {
+    document.getElementById('current-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+}
+
+// Modifier les fonctions d'édition pour vérifier le mode admin
+function protectAdminActions() {
+    // Sauvegarde originale des fonctions
+    const originalAddCode = window.ajouterCode;
+    const originalModifyCode = window.modifierCode;
+    const originalDeleteCode = window.supprimerCode;
+    const originalSaveCode = window.sauvegarderCode;
+    
+    // Remplacer par des fonctions protégées
+    window.ajouterCode = function() {
+        if (!isAdminMode) {
+            afficherMessage('Connectez-vous en mode admin pour ajouter un code', 'warning');
+            return;
+        }
+        originalAddCode();
+    };
+    
+    window.modifierCode = function() {
+        if (!isAdminMode) {
+            afficherMessage('Connectez-vous en mode admin pour modifier un code', 'warning');
+            return;
+        }
+        originalModifyCode();
+    };
+    
+    window.supprimerCode = function() {
+        if (!isAdminMode) {
+            afficherMessage('Connectez-vous en mode admin pour supprimer un code', 'warning');
+            return;
+        }
+        originalDeleteCode();
+    };
+    
+    window.sauvegarderCode = function() {
+        if (!isAdminMode) {
+            afficherMessage('Connectez-vous en mode admin pour sauvegarder', 'warning');
+            return;
+        }
+        originalSaveCode();
+    };
+}
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    chargerDonnees();
+    initAdminSystem();
+    protectAdminActions();
+    
+    // Touche Entrée pour alerte
+    document.getElementById('code-panique').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('btn-alerte').click();
+        }
+    });
+    
+    // Vérifier session admin toutes les minutes
+    setInterval(checkAdminSession, 60000);
+    
+    console.log('Application panique chargée');
+});
     </script>
 </body>
 </html>
